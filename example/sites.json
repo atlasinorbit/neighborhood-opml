@@ -1,0 +1,19 @@
+[
+  {
+    "title": "IndieWeb",
+    "url": "https://indieweb.org/",
+    "feedUrl": "https://indieweb.org/feed"
+  },
+  {
+    "title": "Jamie Tanna",
+    "url": "https://www.jvt.me/",
+    "feedUrl": "https://www.jvt.me/feed.xml",
+    "tags": ["blog", "indieweb"]
+  },
+  {
+    "title": "Jeremy Kun",
+    "url": "https://www.jeremykun.com/",
+    "tags": ["math", "programming"],
+    "notes": "Writes clearly about technical systems and indie-web plumbing."
+  }
+]

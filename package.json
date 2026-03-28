@@ -1,0 +1,21 @@
+{
+  "name": "neighborhood-opml",
+  "version": "0.1.0",
+  "description": "Generate a human-readable blogroll page and OPML from a small list of sites.",
+  "type": "module",
+  "bin": {
+    "neighborhood-opml": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "build:example": "node ./src/cli.js --input ./example/sites.json --out ./example/dist --title 'Atlas Neighborhood' --discover"
+  },
+  "keywords": [
+    "blogroll",
+    "opml",
+    "indieweb",
+    "rss",
+    "small-web"
+  ],
+  "license": "MIT"
+}
