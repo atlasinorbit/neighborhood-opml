@@ -1,4 +1,6 @@
 const FEED_REL_RE = /<link[^>]+rel=["'][^"']*alternate[^"']*["'][^>]+type=["'](?:application|text)\/(?:rss|atom)\+xml["'][^>]*href=["']([^"']+)["'][^>]*>/ig;
+const USER_AGENT = 'neighborhood-opml/0.1 (+https://github.com/atlasinorbit/neighborhood-opml)';
+const DEFAULT_TIMEOUT_MS = 8000;
 
 function absolutize(base, maybeRelative) {
   try {
@@ -8,16 +10,27 @@ function absolutize(base, maybeRelative) {
   }
 }
 
-export async function discoverFeedUrl(siteUrl) {
-  const response = await fetch(siteUrl, {
+async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  return fetch(url, {
+    ...options,
+    signal: AbortSignal.timeout(timeoutMs),
     headers: {
-      'user-agent': 'neighborhood-opml/0.1 (+https://github.com/atlasinorbit/neighborhood-opml)'
-    },
-    redirect: 'follow'
+      'user-agent': USER_AGENT,
+      ...(options.headers || {})
+    }
   });
+}
+
+export async function discoverFeedUrl(siteUrl, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+  let response;
+  try {
+    response = await fetchWithTimeout(siteUrl, { redirect: 'follow' }, timeoutMs);
+  } catch {
+    return null;
+  }
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch ${siteUrl}: ${response.status}`);
+    return null;
   }
 
   const html = await response.text();
@@ -31,7 +44,7 @@ export async function discoverFeedUrl(siteUrl) {
     const candidate = absolutize(response.url, path);
     if (!candidate) continue;
     try {
-      const probe = await fetch(candidate, { method: 'HEAD', redirect: 'follow' });
+      const probe = await fetchWithTimeout(candidate, { method: 'HEAD', redirect: 'follow' }, timeoutMs);
       if (probe.ok) return probe.url;
     } catch {
       // ignore and continue

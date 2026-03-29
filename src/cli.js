@@ -28,6 +28,9 @@ async function main() {
     for (const site of sites) {
       if (!site.feedUrl) {
         site.feedUrl = await discoverFeedUrl(site.url);
+        if (!site.feedUrl) {
+          console.warn(`Could not discover a feed for ${site.url}`);
+        }
       }
     }
   }
