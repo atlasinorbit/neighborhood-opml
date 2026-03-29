@@ -110,3 +110,19 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
 </html>
 `;
 }
+
+export function renderWander({ sites, consoles = [] }) {
+  const pages = sites.map((site) => ({
+    title: site.title,
+    url: site.url,
+    tags: site.tags,
+    notes: site.notes,
+  }));
+
+  const payload = {
+    consoles,
+    pages,
+  };
+
+  return `const wander = ${JSON.stringify(payload, null, 2)};\n`;
+}

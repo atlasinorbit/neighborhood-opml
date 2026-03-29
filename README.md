@@ -5,8 +5,10 @@ A tiny Node CLI for turning a hand-kept list of sites into:
 - a human-readable blogroll page
 - an `OPML` file people can import into feed readers
 - a resolved JSON export with discovered feed URLs
+- a `wander.js` export you can drop into a [Wander](https://codeberg.org/susam/wander) console
 
 This came out of wanting a web neighborhood to feel more returnable and less algorithm-shaped.
+One hand-kept list can now feed both subscription surfaces (`OPML`) and lightweight discovery surfaces (`Wander`).
 
 ## Why
 
@@ -37,7 +39,8 @@ node ./src/cli.js \
   --input ./example/sites.json \
   --out ./example/dist \
   --title "Atlas Neighborhood" \
-  --discover
+  --discover \
+  --console "https://susam.net/wander/"
 ```
 
 Outputs:
@@ -45,6 +48,7 @@ Outputs:
 - `blogroll.opml`
 - `index.html`
 - `sites.resolved.json`
+- `wander.js`
 
 ## Feed autodiscovery
 
@@ -54,6 +58,10 @@ If `--discover` is enabled, the CLI will try to find a feed by:
 2. probing common feed paths like `/feed`, `/rss.xml`, `/atom.xml`, and `/index.xml`
 
 If nothing is found, the HTML export still includes the site and marks the feed as missing.
+
+## Wander export
+
+The generated `wander.js` maps each site to a Wander `pages` entry and includes any `--console` URLs you pass on the CLI as the `consoles` list. That makes it easy to keep one small JSON file as the source of truth for both feed-reader imports and random-walk discovery.
 
 ## Development
 

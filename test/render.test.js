@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeSites, renderHtml, renderOpml } from '../src/render.js';
+import { normalizeSites, renderHtml, renderOpml, renderWander } from '../src/render.js';
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
@@ -37,4 +37,18 @@ test('renderHtml marks missing feeds clearly', () => {
   assert.match(html, /feed missing/);
   assert.match(html, /still worth returning to/);
   assert.match(html, /quiet/);
+});
+
+test('renderWander emits consoles and pages for Wander console use', () => {
+  const js = renderWander({
+    consoles: ['https://susam.net/wander/'],
+    sites: [
+      { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'still worth returning to' }
+    ]
+  });
+
+  assert.match(js, /const wander =/);
+  assert.match(js, /https:\/\/susam.net\/wander\//);
+  assert.match(js, /https:\/\/two.test/);
+  assert.match(js, /still worth returning to/);
 });
