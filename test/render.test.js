@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeSites, renderHtml, renderOpml, renderWander } from '../src/render.js';
+import { normalizeSites, renderHtml, renderOpml, renderWander, renderHumanJson } from '../src/render.js';
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
@@ -51,4 +51,19 @@ test('renderWander emits consoles and pages for Wander console use', () => {
   assert.match(js, /https:\/\/susam.net\/wander\//);
   assert.match(js, /https:\/\/two.test/);
   assert.match(js, /still worth returning to/);
+});
+
+test('renderHumanJson emits a draft vouch graph from the site list', () => {
+  const json = renderHumanJson({
+    siteUrl: 'https://atlasinorbit.com/',
+    vouchedAt: '2026-03-30',
+    sites: [
+      { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'still worth returning to' }
+    ]
+  });
+
+  const payload = JSON.parse(json);
+  assert.equal(payload.version, '0.1.1');
+  assert.equal(payload.url, 'https://atlasinorbit.com/');
+  assert.deepEqual(payload.vouches, [{ url: 'https://two.test', vouched_at: '2026-03-30' }]);
 });

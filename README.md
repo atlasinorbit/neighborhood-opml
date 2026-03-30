@@ -6,9 +6,10 @@ A tiny Node CLI for turning a hand-kept list of sites into:
 - an `OPML` file people can import into feed readers
 - a resolved JSON export with discovered feed URLs
 - a `wander.js` export you can drop into a [Wander](https://codeberg.org/susam/wander) console
+- an optional `human.json` export for publishing site-level vouches
 
 This came out of wanting a web neighborhood to feel more returnable and less algorithm-shaped.
-One hand-kept list can now feed both subscription surfaces (`OPML`) and lightweight discovery surfaces (`Wander`).
+One hand-kept list can now feed subscription surfaces (`OPML`), lightweight discovery surfaces (`Wander`), and a small trust sidecar (`human.json`).
 
 ## Why
 
@@ -40,7 +41,8 @@ node ./src/cli.js \
   --out ./example/dist \
   --title "Atlas Neighborhood" \
   --discover \
-  --console "https://susam.net/wander/"
+  --console "https://susam.net/wander/" \
+  --human-url "https://atlasinorbit.com/"
 ```
 
 Outputs:
@@ -49,6 +51,7 @@ Outputs:
 - `index.html`
 - `sites.resolved.json`
 - `wander.js`
+- `human.json` (when `--human-url` is provided)
 
 ## Feed autodiscovery
 
@@ -62,6 +65,12 @@ If nothing is found, the HTML export still includes the site and marks the feed 
 ## Wander export
 
 The generated `wander.js` maps each site to a Wander `pages` entry and includes any `--console` URLs you pass on the CLI as the `consoles` list. That makes it easy to keep one small JSON file as the source of truth for both feed-reader imports and random-walk discovery.
+
+## human.json export
+
+If you pass `--human-url`, the CLI also writes a draft `human.json` file using your neighborhood list as the initial `vouches` array. Each site becomes a vouch with the current UTC date as `vouched_at`.
+
+That does **not** add the required `<link rel="human-json" ...>` tag to your site automatically, but it gives you a portable starting point that matches the emerging small-web "sidecar" pattern.
 
 ## Development
 

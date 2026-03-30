@@ -126,3 +126,16 @@ export function renderWander({ sites, consoles = [] }) {
 
   return `const wander = ${JSON.stringify(payload, null, 2)};\n`;
 }
+
+export function renderHumanJson({ siteUrl, sites, version = '0.1.1', vouchedAt = new Date().toISOString().slice(0, 10) }) {
+  const payload = {
+    version,
+    url: siteUrl,
+    vouches: sites.map((site) => ({
+      url: site.url,
+      vouched_at: vouchedAt,
+    })),
+  };
+
+  return `${JSON.stringify(payload, null, 2)}\n`;
+}
