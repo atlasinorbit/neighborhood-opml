@@ -53,6 +53,8 @@ Outputs:
 - `wander.js`
 - `human.json` (when `--human-url` is provided)
 
+The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
+
 ## Feed autodiscovery
 
 If `--discover` is enabled, the CLI will try to find a feed by:

@@ -53,7 +53,7 @@ ${outlines}
 `;
 }
 
-export function renderHtml({ title, sites, generatedAt = new Date().toISOString() }) {
+export function renderHtml({ title, sites, generatedAt = new Date().toISOString(), includeHumanJson = false }) {
   const items = sites.map((site) => {
     const tags = site.tags.length
       ? `<ul class="tags">${site.tags.map((tag) => `<li>${escapeHtml(tag)}</li>`).join('')}</ul>`
@@ -95,6 +95,8 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       .tags { display: flex; gap: .5rem; flex-wrap: wrap; list-style: none; padding: 0; margin: .75rem 0 0; }
       .tags li { border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: .2rem .55rem; font-size: .84rem; }
       code { background: rgba(255,255,255,.08); padding: .12rem .35rem; border-radius: .35rem; }
+      .exports { display: flex; gap: .75rem; flex-wrap: wrap; margin: 1rem 0 1.5rem; padding: 0; list-style: none; }
+      .exports a { text-decoration: none; }
     </style>
   </head>
   <body>
@@ -102,6 +104,12 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       <h1>${escapeHtml(title)}</h1>
       <p class="meta">Generated ${escapeHtml(generatedAt)} · OPML is for subscription, HTML is for wandering.</p>
       <p>Some parts of the web still work better as neighborhoods than feeds. This page is a small exported list of places worth returning to.</p>
+      <ul class="exports">
+        <li><a href="./blogroll.opml">OPML</a></li>
+        <li><a href="./sites.resolved.json">resolved JSON</a></li>
+        <li><a href="./wander.js">wander.js</a></li>
+        ${includeHumanJson ? '<li><a href="./human.json">human.json draft</a></li>' : ''}
+      </ul>
       <ul class="sites">
         ${items}
       </ul>

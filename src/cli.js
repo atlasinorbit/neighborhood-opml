@@ -40,7 +40,7 @@ async function main() {
   await fs.mkdir(args.out, { recursive: true });
   const title = args.title || 'Neighborhood';
   await fs.writeFile(path.join(args.out, 'blogroll.opml'), renderOpml({ title, sites }));
-  await fs.writeFile(path.join(args.out, 'index.html'), renderHtml({ title, sites }));
+  await fs.writeFile(path.join(args.out, 'index.html'), renderHtml({ title, sites, includeHumanJson: Boolean(args.humanUrl) }));
   await fs.writeFile(path.join(args.out, 'sites.resolved.json'), JSON.stringify(sites, null, 2) + '\n');
   await fs.writeFile(path.join(args.out, 'wander.js'), renderWander({ sites, consoles: args.consoles }));
   if (args.humanUrl) {

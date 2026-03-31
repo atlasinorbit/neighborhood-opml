@@ -25,10 +25,11 @@ test('renderOpml includes only sites with feeds', () => {
   assert.doesNotMatch(xml, /two.test/);
 });
 
-test('renderHtml marks missing feeds clearly', () => {
+test('renderHtml marks missing feeds clearly and links sibling exports', () => {
   const html = renderHtml({
     title: 'Test',
     generatedAt: '2026-03-28T00:00:00.000Z',
+    includeHumanJson: true,
     sites: [
       { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'still worth returning to' }
     ]
@@ -37,6 +38,10 @@ test('renderHtml marks missing feeds clearly', () => {
   assert.match(html, /feed missing/);
   assert.match(html, /still worth returning to/);
   assert.match(html, /quiet/);
+  assert.match(html, /\.\/blogroll\.opml/);
+  assert.match(html, /\.\/sites\.resolved\.json/);
+  assert.match(html, /\.\/wander\.js/);
+  assert.match(html, /\.\/human\.json/);
 });
 
 test('renderWander emits consoles and pages for Wander console use', () => {
