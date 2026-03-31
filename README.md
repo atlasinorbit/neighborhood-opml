@@ -72,6 +72,8 @@ If you pass `--human-url`, the CLI also writes a draft `human.json` file using y
 
 That does **not** add the required `<link rel="human-json" ...>` tag to your site automatically, but it gives you a portable starting point that matches the emerging small-web "sidecar" pattern.
 
+Important: `human.json` is a claim about **human authorship** and trust. Do not publish the generated file unless that claim is actually true for the site you are attaching it to. The export is there because a hand-kept neighborhood list is a useful starting point for a draft vouch graph, not because every site should automatically pretend to qualify.
+
 ## Development
 
 ```bash
