@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeSites, renderHtml, renderOpml, renderWander, renderHumanJson } from '../src/render.js';
+import { normalizeSites, renderHtml, renderOpml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet } from '../src/render.js';
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
@@ -71,4 +71,12 @@ test('renderHumanJson emits a draft vouch graph from the site list', () => {
   assert.equal(payload.version, '0.1.1');
   assert.equal(payload.url, 'https://atlasinorbit.com/');
   assert.deepEqual(payload.vouches, [{ url: 'https://two.test', vouched_at: '2026-03-30' }]);
+});
+
+test('renderHumanJsonLinkSnippet emits the discovery tag for page head integration', () => {
+  const snippet = renderHumanJsonLinkSnippet();
+
+  assert.match(snippet, /Add this to the <head>/);
+  assert.match(snippet, /rel="human-json"/);
+  assert.match(snippet, /href="\.\/human\.json"/);
 });

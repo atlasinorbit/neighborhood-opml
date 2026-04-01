@@ -52,6 +52,7 @@ Outputs:
 - `sites.resolved.json`
 - `wander.js`
 - `human.json` (when `--human-url` is provided)
+- `human-json-link.html` (when `--human-url` is provided; a tiny `<head>` snippet for discovery)
 
 The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
 
@@ -72,9 +73,11 @@ The generated `wander.js` maps each site to a Wander `pages` entry and includes 
 
 If you pass `--human-url`, the CLI also writes a draft `human.json` file using your neighborhood list as the initial `vouches` array. Each site becomes a vouch with the current UTC date as `vouched_at`.
 
-That does **not** add the required `<link rel="human-json" ...>` tag to your site automatically, but it gives you a portable starting point that matches the emerging small-web "sidecar" pattern.
+It also writes `human-json-link.html`, a tiny snippet containing the required `<link rel="human-json" ...>` tag you can drop into your site `<head>`.
 
 Important: `human.json` is a claim about **human authorship** and trust. Do not publish the generated file unless that claim is actually true for the site you are attaching it to. The export is there because a hand-kept neighborhood list is a useful starting point for a draft vouch graph, not because every site should automatically pretend to qualify.
+
+Also note: browser-based verifiers expect the published `human.json` to be served with `Content-Type: application/json` and `Access-Control-Allow-Origin: *`.
 
 ## Development
 

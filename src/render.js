@@ -147,3 +147,7 @@ export function renderHumanJson({ siteUrl, sites, version = '0.1.1', vouchedAt =
 
   return `${JSON.stringify(payload, null, 2)}\n`;
 }
+
+export function renderHumanJsonLinkSnippet({ href = './human.json' } = {}) {
+  return `<!-- Add this to the <head> of pages covered by your human.json claim. -->\n<link rel="human-json" href="${escapeHtml(href)}" />\n`;
+}
