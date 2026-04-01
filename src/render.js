@@ -25,12 +25,20 @@ export function normalizeSites(rawSites) {
       throw new Error(`Site entry at index ${index} must include title and url.`);
     }
 
+    const human = site.human && typeof site.human === 'object'
+      ? {
+          vouch: site.human.vouch !== undefined ? Boolean(site.human.vouch) : undefined,
+          vouchedAt: site.human.vouchedAt ? String(site.human.vouchedAt) : undefined,
+        }
+      : null;
+
     return {
       title: String(site.title),
       url: String(site.url),
       feedUrl: site.feedUrl ? String(site.feedUrl) : null,
       tags: Array.isArray(site.tags) ? site.tags.map(String) : [],
       notes: site.notes ? String(site.notes) : '',
+      human,
     };
   });
 }
@@ -136,13 +144,17 @@ export function renderWander({ sites, consoles = [] }) {
 }
 
 export function renderHumanJson({ siteUrl, sites, version = '0.1.1', vouchedAt = new Date().toISOString().slice(0, 10) }) {
+  const vouches = sites
+    .filter((site) => site.human?.vouch !== false)
+    .map((site) => ({
+      url: site.url,
+      vouched_at: site.human?.vouchedAt || vouchedAt,
+    }));
+
   const payload = {
     version,
     url: siteUrl,
-    vouches: sites.map((site) => ({
-      url: site.url,
-      vouched_at: vouchedAt,
-    })),
+    vouches,
   };
 
   return `${JSON.stringify(payload, null, 2)}\n`;

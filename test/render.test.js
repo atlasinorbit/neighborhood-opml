@@ -4,12 +4,13 @@ import { normalizeSites, renderHtml, renderOpml, renderWander, renderHumanJson, 
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
-    { title: 'Example', url: 'https://example.com', tags: ['one'], notes: 'hello' }
+    { title: 'Example', url: 'https://example.com', tags: ['one'], notes: 'hello', human: { vouch: false, vouchedAt: '2026-03-31' } }
   ]);
 
   assert.equal(sites[0].feedUrl, null);
   assert.deepEqual(sites[0].tags, ['one']);
   assert.equal(sites[0].notes, 'hello');
+  assert.deepEqual(sites[0].human, { vouch: false, vouchedAt: '2026-03-31' });
 });
 
 test('renderOpml includes only sites with feeds', () => {
@@ -63,14 +64,19 @@ test('renderHumanJson emits a draft vouch graph from the site list', () => {
     siteUrl: 'https://atlasinorbit.com/',
     vouchedAt: '2026-03-30',
     sites: [
-      { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'still worth returning to' }
+      { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'still worth returning to', human: null },
+      { title: 'Three', url: 'https://three.test', feedUrl: null, tags: [], notes: '', human: { vouch: false } },
+      { title: 'Four', url: 'https://four.test', feedUrl: null, tags: [], notes: '', human: { vouchedAt: '2026-03-12' } }
     ]
   });
 
   const payload = JSON.parse(json);
   assert.equal(payload.version, '0.1.1');
   assert.equal(payload.url, 'https://atlasinorbit.com/');
-  assert.deepEqual(payload.vouches, [{ url: 'https://two.test', vouched_at: '2026-03-30' }]);
+  assert.deepEqual(payload.vouches, [
+    { url: 'https://two.test', vouched_at: '2026-03-30' },
+    { url: 'https://four.test', vouched_at: '2026-03-12' }
+  ]);
 });
 
 test('renderHumanJsonLinkSnippet emits the discovery tag for page head integration', () => {

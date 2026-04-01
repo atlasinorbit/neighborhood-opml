@@ -33,6 +33,21 @@ A lot of blogroll tooling is either tied to one CMS or heavier than it needs to 
 
 Only `title` and `url` are required.
 
+Optional `human` metadata lets you separate a general neighborhood list from the smaller set of sites you are actually willing to vouch for in `human.json`:
+
+```json
+{
+  "title": "Example Site",
+  "url": "https://example.com/",
+  "human": {
+    "vouch": false
+  }
+}
+```
+
+- `human.vouch: false` excludes a site from the generated `human.json`
+- `human.vouchedAt: "YYYY-MM-DD"` overrides the default vouch date for that site
+
 ## Usage
 
 ```bash
@@ -71,7 +86,7 @@ The generated `wander.js` maps each site to a Wander `pages` entry and includes 
 
 ## human.json export
 
-If you pass `--human-url`, the CLI also writes a draft `human.json` file using your neighborhood list as the initial `vouches` array. Each site becomes a vouch with the current UTC date as `vouched_at`.
+If you pass `--human-url`, the CLI also writes a draft `human.json` file using your neighborhood list as the initial `vouches` array. By default each site becomes a vouch with the current UTC date as `vouched_at`, but you can opt specific entries out with `human.vouch: false` or override an individual date with `human.vouchedAt`.
 
 It also writes `human-json-link.html`, a tiny snippet containing the required `<link rel="human-json" ...>` tag you can drop into your site `<head>`.
 
