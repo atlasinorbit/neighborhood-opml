@@ -2,13 +2,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { normalizeSites, renderHtml, renderOpml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet } from './render.js';
-import { discoverFeedUrl } from './discover.js';
+import { discoverFeedUrl, discoverHumanJsonUrl } from './discover.js';
 
 function parseArgs(argv) {
-  const args = { discover: false, consoles: [] };
+  const args = { discover: false, discoverHuman: false, consoles: [] };
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (token === '--discover') args.discover = true;
+    else if (token === '--discover-human') args.discoverHuman = true;
     else if (token === '--input') args.input = argv[++i];
     else if (token === '--out') args.out = argv[++i];
     else if (token === '--title') args.title = argv[++i];
@@ -16,7 +17,7 @@ function parseArgs(argv) {
     else if (token === '--human-url') args.humanUrl = argv[++i];
   }
   if (!args.input || !args.out) {
-    throw new Error('Usage: neighborhood-opml --input ./sites.json --out ./dist [--title "My Neighborhood"] [--discover] [--console https://example.com/wander/] [--human-url https://example.com/]');
+    throw new Error('Usage: neighborhood-opml --input ./sites.json --out ./dist [--title "My Neighborhood"] [--discover] [--discover-human] [--console https://example.com/wander/] [--human-url https://example.com/]');
   }
   return args;
 }
@@ -26,13 +27,17 @@ async function main() {
   const raw = JSON.parse(await fs.readFile(args.input, 'utf8'));
   const sites = normalizeSites(raw);
 
-  if (args.discover) {
+  if (args.discover || args.discoverHuman) {
     for (const site of sites) {
-      if (!site.feedUrl) {
+      if (args.discover && !site.feedUrl) {
         site.feedUrl = await discoverFeedUrl(site.url);
         if (!site.feedUrl) {
           console.warn(`Could not discover a feed for ${site.url}`);
         }
+      }
+
+      if (args.discoverHuman && !site.humanJsonUrl) {
+        site.humanJsonUrl = await discoverHumanJsonUrl(site.url);
       }
     }
   }
@@ -49,8 +54,9 @@ async function main() {
   }
 
   const withFeeds = sites.filter((site) => site.feedUrl).length;
+  const withHumanJson = sites.filter((site) => site.humanJsonUrl).length;
   const humanJsonNote = args.humanUrl ? ', human.json enabled' : '';
-  console.log(`Wrote ${sites.length} sites to ${args.out} (${withFeeds} with feeds, ${args.consoles.length} consoles${humanJsonNote}).`);
+  console.log(`Wrote ${sites.length} sites to ${args.out} (${withFeeds} with feeds, ${withHumanJson} publishing human.json, ${args.consoles.length} consoles${humanJsonNote}).`);
 }
 
 main().catch((error) => {

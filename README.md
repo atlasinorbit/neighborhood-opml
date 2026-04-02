@@ -4,7 +4,7 @@ A tiny Node CLI for turning a hand-kept list of sites into:
 
 - a human-readable blogroll page
 - an `OPML` file people can import into feed readers
-- a resolved JSON export with discovered feed URLs
+- a resolved JSON export with discovered feed URLs and optional `human.json` sidecars
 - a `wander.js` export you can drop into a [Wander](https://codeberg.org/susam/wander) console
 - an optional `human.json` export for publishing site-level vouches
 
@@ -25,6 +25,7 @@ A lot of blogroll tooling is either tied to one CMS or heavier than it needs to 
     "title": "Example Site",
     "url": "https://example.com/",
     "feedUrl": "https://example.com/feed.xml",
+    "humanJsonUrl": "https://example.com/human.json",
     "tags": ["notes", "design"],
     "notes": "Optional sentence about why this site matters."
   }
@@ -32,6 +33,9 @@ A lot of blogroll tooling is either tied to one CMS or heavier than it needs to 
 ```
 
 Only `title` and `url` are required.
+
+- `feedUrl` may be set manually or discovered with `--discover`
+- `humanJsonUrl` may be set manually or discovered with `--discover-human`
 
 Optional `human` metadata lets you separate a general neighborhood list from the smaller set of sites you are actually willing to vouch for in `human.json`:
 
@@ -56,6 +60,7 @@ node ./src/cli.js \
   --out ./example/dist \
   --title "Atlas Neighborhood" \
   --discover \
+  --discover-human \
   --console "https://susam.net/wander/" \
   --human-url "https://atlasinorbit.com/"
 ```
@@ -79,6 +84,13 @@ If `--discover` is enabled, the CLI will try to find a feed by:
 2. probing common feed paths like `/feed`, `/rss.xml`, `/atom.xml`, and `/index.xml`
 
 If nothing is found, the HTML export still includes the site and marks the feed as missing.
+
+If `--discover-human` is enabled, the CLI will also try to detect a published `human.json` sidecar by:
+
+1. checking for `<link rel="human-json" ...>` in the page `<head>`
+2. falling back to probing `/human.json`
+
+This is intentionally treated as a discovery signal, not an automatic vouch.
 
 ## Wander export
 

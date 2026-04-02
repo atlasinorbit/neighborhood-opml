@@ -4,10 +4,11 @@ import { normalizeSites, renderHtml, renderOpml, renderWander, renderHumanJson, 
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
-    { title: 'Example', url: 'https://example.com', tags: ['one'], notes: 'hello', human: { vouch: false, vouchedAt: '2026-03-31' } }
+    { title: 'Example', url: 'https://example.com', humanJsonUrl: 'https://example.com/human.json', tags: ['one'], notes: 'hello', human: { vouch: false, vouchedAt: '2026-03-31' } }
   ]);
 
   assert.equal(sites[0].feedUrl, null);
+  assert.equal(sites[0].humanJsonUrl, 'https://example.com/human.json');
   assert.deepEqual(sites[0].tags, ['one']);
   assert.equal(sites[0].notes, 'hello');
   assert.deepEqual(sites[0].human, { vouch: false, vouchedAt: '2026-03-31' });
@@ -32,13 +33,15 @@ test('renderHtml marks missing feeds clearly and links sibling exports', () => {
     generatedAt: '2026-03-28T00:00:00.000Z',
     includeHumanJson: true,
     sites: [
-      { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'still worth returning to' }
+      { title: 'Two', url: 'https://two.test', feedUrl: null, humanJsonUrl: 'https://two.test/human.json', tags: ['quiet'], notes: 'still worth returning to' }
     ]
   });
 
   assert.match(html, /feed missing/);
   assert.match(html, /still worth returning to/);
   assert.match(html, /quiet/);
+  assert.match(html, /human\.json ↗/);
+  assert.match(html, /publishes that sidecar/);
   assert.match(html, /\.\/blogroll\.opml/);
   assert.match(html, /\.\/sites\.resolved\.json/);
   assert.match(html, /\.\/wander\.js/);

@@ -36,6 +36,7 @@ export function normalizeSites(rawSites) {
       title: String(site.title),
       url: String(site.url),
       feedUrl: site.feedUrl ? String(site.feedUrl) : null,
+      humanJsonUrl: site.humanJsonUrl ? String(site.humanJsonUrl) : null,
       tags: Array.isArray(site.tags) ? site.tags.map(String) : [],
       notes: site.notes ? String(site.notes) : '',
       human,
@@ -70,11 +71,17 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       ? `<a class="feed" href="${escapeHtml(site.feedUrl)}">feed ↗</a>`
       : '<span class="feed missing">feed missing</span>';
     const notes = site.notes ? `<p>${escapeHtml(site.notes)}</p>` : '';
+    const humanJson = site.humanJsonUrl
+      ? `<a class="human-json" href="${escapeHtml(site.humanJsonUrl)}">human.json ↗</a>`
+      : '';
 
     return `<li>
       <div class="row">
         <a class="title" href="${escapeHtml(site.url)}">${escapeHtml(site.title)}</a>
-        ${feed}
+        <div class="signals">
+          ${feed}
+          ${humanJson}
+        </div>
       </div>
       ${notes}
       ${tags}
@@ -98,7 +105,8 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       .row { display: flex; gap: .75rem; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
       a { color: #9bd1ff; }
       .title { font-weight: 700; text-decoration: none; }
-      .feed { font-size: .95rem; }
+      .signals { display: flex; gap: .75rem; flex-wrap: wrap; align-items: baseline; }
+      .feed, .human-json { font-size: .95rem; }
       .feed.missing { opacity: .55; }
       .tags { display: flex; gap: .5rem; flex-wrap: wrap; list-style: none; padding: 0; margin: .75rem 0 0; }
       .tags li { border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: .2rem .55rem; font-size: .84rem; }
@@ -112,6 +120,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       <h1>${escapeHtml(title)}</h1>
       <p class="meta">Generated ${escapeHtml(generatedAt)} · OPML is for subscription, HTML is for wandering.</p>
       <p>Some parts of the web still work better as neighborhoods than feeds. This page is a small exported list of places worth returning to.</p>
+      <p class="meta">A visible <code>human.json</code> link means a site publishes that sidecar. It is not the same thing as this page personally vouching for the site.</p>
       <ul class="exports">
         <li><a href="./blogroll.opml">OPML</a></li>
         <li><a href="./sites.resolved.json">resolved JSON</a></li>
