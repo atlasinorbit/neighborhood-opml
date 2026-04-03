@@ -27,25 +27,30 @@ test('renderOpml includes only sites with feeds', () => {
   assert.doesNotMatch(xml, /two.test/);
 });
 
-test('renderHtml marks missing feeds clearly and links sibling exports', () => {
+test('renderHtml marks missing feeds clearly and distinguishes human.json from draft vouches', () => {
   const html = renderHtml({
     title: 'Test',
     generatedAt: '2026-03-28T00:00:00.000Z',
     includeHumanJson: true,
     sites: [
-      { title: 'Two', url: 'https://two.test', feedUrl: null, humanJsonUrl: 'https://two.test/human.json', tags: ['quiet'], notes: 'still worth returning to' }
+      { title: 'Two', url: 'https://two.test', feedUrl: null, humanJsonUrl: 'https://two.test/human.json', tags: ['quiet'], notes: 'still worth returning to', human: null },
+      { title: 'Three', url: 'https://three.test', feedUrl: 'https://three.test/feed.xml', humanJsonUrl: null, tags: [], notes: '', human: { vouch: false } }
     ]
   });
 
   assert.match(html, /feed missing/);
   assert.match(html, /still worth returning to/);
   assert.match(html, /quiet/);
-  assert.match(html, /human\.json ↗/);
-  assert.match(html, /publishes that sidecar/);
+  assert.match(html, /publishes human\.json ↗/);
+  assert.match(html, /included in draft vouch list/);
+  assert.match(html, /different signals/);
   assert.match(html, /\.\/blogroll\.opml/);
   assert.match(html, /\.\/sites\.resolved\.json/);
   assert.match(html, /\.\/wander\.js/);
   assert.match(html, /\.\/human\.json/);
+
+  const vouchBadgeCount = (html.match(/class="vouch">included in draft vouch list/g) || []).length;
+  assert.equal(vouchBadgeCount, 1);
 });
 
 test('renderWander emits consoles and pages for Wander console use', () => {

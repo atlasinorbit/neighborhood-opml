@@ -76,6 +76,13 @@ Outputs:
 
 The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
 
+When `--human-url` is enabled, the HTML export also distinguishes two different signals:
+
+- `publishes human.json` = the listed site exposes its own sidecar
+- `included in draft vouch list` = your generated `human.json` draft would include that site as a vouch
+
+That keeps discovery and trust adjacent without flattening them into the same thing.
+
 ## Feed autodiscovery
 
 If `--discover` is enabled, the CLI will try to find a feed by:

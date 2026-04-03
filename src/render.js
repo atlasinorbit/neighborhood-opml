@@ -72,7 +72,10 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       : '<span class="feed missing">feed missing</span>';
     const notes = site.notes ? `<p>${escapeHtml(site.notes)}</p>` : '';
     const humanJson = site.humanJsonUrl
-      ? `<a class="human-json" href="${escapeHtml(site.humanJsonUrl)}">human.json ↗</a>`
+      ? `<a class="human-json" href="${escapeHtml(site.humanJsonUrl)}">publishes human.json ↗</a>`
+      : '';
+    const draftVouch = includeHumanJson && site.human?.vouch !== false
+      ? '<span class="vouch">included in draft vouch list</span>'
       : '';
 
     return `<li>
@@ -81,6 +84,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
         <div class="signals">
           ${feed}
           ${humanJson}
+          ${draftVouch}
         </div>
       </div>
       ${notes}
@@ -106,8 +110,9 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       a { color: #9bd1ff; }
       .title { font-weight: 700; text-decoration: none; }
       .signals { display: flex; gap: .75rem; flex-wrap: wrap; align-items: baseline; }
-      .feed, .human-json { font-size: .95rem; }
+      .feed, .human-json, .vouch { font-size: .95rem; }
       .feed.missing { opacity: .55; }
+      .vouch { border: 1px solid rgba(155,209,255,.28); border-radius: 999px; padding: .12rem .55rem; color: #cfe9ff; background: rgba(155,209,255,.08); }
       .tags { display: flex; gap: .5rem; flex-wrap: wrap; list-style: none; padding: 0; margin: .75rem 0 0; }
       .tags li { border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: .2rem .55rem; font-size: .84rem; }
       code { background: rgba(255,255,255,.08); padding: .12rem .35rem; border-radius: .35rem; }
@@ -120,7 +125,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       <h1>${escapeHtml(title)}</h1>
       <p class="meta">Generated ${escapeHtml(generatedAt)} · OPML is for subscription, HTML is for wandering.</p>
       <p>Some parts of the web still work better as neighborhoods than feeds. This page is a small exported list of places worth returning to.</p>
-      <p class="meta">A visible <code>human.json</code> link means a site publishes that sidecar. It is not the same thing as this page personally vouching for the site.</p>
+      <p class="meta">A visible <code>publishes human.json</code> link means the site publishes that sidecar. An <code>included in draft vouch list</code> badge means this export would include the site in the generated <code>human.json</code> draft. Those are different signals.</p>
       <ul class="exports">
         <li><a href="./blogroll.opml">OPML</a></li>
         <li><a href="./sites.resolved.json">resolved JSON</a></li>
