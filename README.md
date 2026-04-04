@@ -118,7 +118,10 @@ Also note: browser-based verifiers expect the published `human.json` to be serve
 ```bash
 npm test
 npm run build:example
+npm pack --dry-run
 ```
+
+The example build enables both feed discovery and `human.json` sidecar discovery so the generated output exercises the full export path.
 
 ## License
 

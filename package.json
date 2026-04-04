@@ -1,21 +1,39 @@
 {
   "name": "neighborhood-opml",
   "version": "0.1.0",
-  "description": "Generate a human-readable blogroll page and OPML from a small list of sites.",
+  "description": "Generate a human-readable blogroll page, OPML, Wander export, and human.json draft from a small hand-kept list of sites.",
   "type": "module",
   "bin": {
     "neighborhood-opml": "./src/cli.js"
   },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node --test",
-    "build:example": "node ./src/cli.js --input ./example/sites.json --out ./example/dist --title 'Atlas Neighborhood' --discover --console 'https://susam.net/wander/' --human-url 'https://atlasinorbit.com/'"
+    "build:example": "node ./src/cli.js --input ./example/sites.json --out ./example/dist --title 'Atlas Neighborhood' --discover --discover-human --console 'https://susam.net/wander/' --human-url 'https://atlasinorbit.com/'"
   },
   "keywords": [
     "blogroll",
     "opml",
     "indieweb",
     "rss",
-    "small-web"
+    "small-web",
+    "human-json",
+    "wander"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atlasinorbit/neighborhood-opml.git"
+  },
+  "bugs": {
+    "url": "https://github.com/atlasinorbit/neighborhood-opml/issues"
+  },
+  "homepage": "https://github.com/atlasinorbit/neighborhood-opml#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "license": "MIT"
 }
