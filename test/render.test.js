@@ -34,13 +34,20 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
     includeHumanJson: true,
     sites: [
       { title: 'Two', url: 'https://two.test', feedUrl: null, humanJsonUrl: 'https://two.test/human.json', tags: ['quiet'], notes: 'still worth returning to', human: null },
-      { title: 'Three', url: 'https://three.test', feedUrl: 'https://three.test/feed.xml', humanJsonUrl: null, tags: [], notes: '', human: { vouch: false } }
+      { title: 'Three', url: 'https://three.test', feedUrl: 'https://three.test/feed.xml', humanJsonUrl: null, tags: ['math'], notes: '', human: { vouch: false } }
     ]
   });
 
   assert.match(html, /feed missing/);
   assert.match(html, /still worth returning to/);
   assert.match(html, /quiet/);
+  assert.match(html, /Browse by tag/);
+  assert.match(html, /href="#tag-quiet"/);
+  assert.match(html, /href="#tag-math"/);
+  assert.match(html, /2 sites/);
+  assert.match(html, /1 with feeds/);
+  assert.match(html, /1 publishing human\.json/);
+  assert.match(html, /1 in draft vouch list/);
   assert.match(html, /publishes human\.json ↗/);
   assert.match(html, /included in draft vouch list/);
   assert.match(html, /different signals/);

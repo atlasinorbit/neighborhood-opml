@@ -76,6 +76,12 @@ Outputs:
 
 The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
 
+The HTML export also leans a little more browse-first than a flat dump:
+
+- a tiny stats strip shows how many sites resolved feeds and `human.json`
+- discovered tags become a lightweight `Browse by tag` index
+- each site's tag pills link back into that shared tag index
+
 When `--human-url` is enabled, the HTML export also distinguishes two different signals:
 
 - `publishes human.json` = the listed site exposes its own sidecar

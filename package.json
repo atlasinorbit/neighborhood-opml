@@ -1,6 +1,6 @@
 {
   "name": "neighborhood-opml",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generate a human-readable blogroll page, OPML, Wander export, and human.json draft from a small hand-kept list of sites.",
   "type": "module",
   "bin": {

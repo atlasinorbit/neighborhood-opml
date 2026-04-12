@@ -11,6 +11,14 @@ function escapeHtml(value = '') {
   return escapeXml(value);
 }
 
+function slugifyTag(value = '') {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/g, '-')
+    .replaceAll(/^-+|-+$/g, '');
+}
+
 export function normalizeSites(rawSites) {
   if (!Array.isArray(rawSites)) {
     throw new Error('Input file must contain a JSON array of site entries.');
@@ -63,9 +71,30 @@ ${outlines}
 }
 
 export function renderHtml({ title, sites, generatedAt = new Date().toISOString(), includeHumanJson = false }) {
+  const withFeeds = sites.filter((site) => site.feedUrl).length;
+  const withHumanJson = sites.filter((site) => site.humanJsonUrl).length;
+  const draftVouchCount = includeHumanJson
+    ? sites.filter((site) => site.human?.vouch !== false).length
+    : 0;
+
+  const tagCounts = new Map();
+  for (const site of sites) {
+    for (const tag of site.tags) {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+    }
+  }
+
+  const browseTags = Array.from(tagCounts.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([tag, count]) => ({
+      tag,
+      count,
+      slug: slugifyTag(tag),
+    }));
+
   const items = sites.map((site) => {
     const tags = site.tags.length
-      ? `<ul class="tags">${site.tags.map((tag) => `<li>${escapeHtml(tag)}</li>`).join('')}</ul>`
+      ? `<ul class="tags">${site.tags.map((tag) => `<li><a href="#tag-${escapeHtml(slugifyTag(tag))}">${escapeHtml(tag)}</a></li>`).join('')}</ul>`
       : '';
     const feed = site.feedUrl
       ? `<a class="feed" href="${escapeHtml(site.feedUrl)}">feed ↗</a>`
@@ -92,6 +121,20 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
     </li>`;
   }).join('\n');
 
+  const stats = [
+    `${sites.length} sites`,
+    `${withFeeds} with feeds`,
+    `${withHumanJson} publishing human.json`,
+    includeHumanJson ? `${draftVouchCount} in draft vouch list` : null,
+  ].filter(Boolean).map((value) => `<li>${escapeHtml(value)}</li>`).join('');
+
+  const tagIndex = browseTags.length
+    ? `<section class="browse" aria-labelledby="browse-by-tag">
+        <h2 id="browse-by-tag">Browse by tag</h2>
+        <ul class="tag-index">${browseTags.map(({ tag, count, slug }) => `<li id="tag-${escapeHtml(slug)}"><a href="#tag-${escapeHtml(slug)}">${escapeHtml(tag)}</a> <span>${count}</span></li>`).join('')}</ul>
+      </section>`
+    : '';
+
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -103,6 +146,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; background: #0b1020; color: #e6edf3; }
       main { max-width: 52rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
       h1 { margin-bottom: .5rem; }
+      h2 { margin: 2rem 0 .75rem; font-size: 1rem; text-transform: uppercase; letter-spacing: .08em; opacity: .9; }
       p.meta { opacity: .72; margin-top: 0; }
       ul.sites { list-style: none; padding: 0; display: grid; gap: 1rem; }
       ul.sites > li { border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 1rem; background: rgba(255,255,255,.03); }
@@ -113,10 +157,14 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       .feed, .human-json, .vouch { font-size: .95rem; }
       .feed.missing { opacity: .55; }
       .vouch { border: 1px solid rgba(155,209,255,.28); border-radius: 999px; padding: .12rem .55rem; color: #cfe9ff; background: rgba(155,209,255,.08); }
-      .tags { display: flex; gap: .5rem; flex-wrap: wrap; list-style: none; padding: 0; margin: .75rem 0 0; }
-      .tags li { border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: .2rem .55rem; font-size: .84rem; }
+      .tags, .stats, .tag-index { display: flex; gap: .5rem; flex-wrap: wrap; list-style: none; padding: 0; }
+      .tags { margin: .75rem 0 0; }
+      .tags li, .tag-index li, .stats li { border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: .2rem .55rem; font-size: .84rem; }
+      .tags a, .tag-index a { text-decoration: none; }
+      .tag-index li span { opacity: .7; margin-left: .25rem; }
+      .browse { margin: 1.25rem 0 1.5rem; }
       code { background: rgba(255,255,255,.08); padding: .12rem .35rem; border-radius: .35rem; }
-      .exports { display: flex; gap: .75rem; flex-wrap: wrap; margin: 1rem 0 1.5rem; padding: 0; list-style: none; }
+      .exports { display: flex; gap: .75rem; flex-wrap: wrap; margin: 1rem 0 1rem; padding: 0; list-style: none; }
       .exports a { text-decoration: none; }
     </style>
   </head>
@@ -125,6 +173,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       <h1>${escapeHtml(title)}</h1>
       <p class="meta">Generated ${escapeHtml(generatedAt)} · OPML is for subscription, HTML is for wandering.</p>
       <p>Some parts of the web still work better as neighborhoods than feeds. This page is a small exported list of places worth returning to.</p>
+      <ul class="stats">${stats}</ul>
       <p class="meta">A visible <code>publishes human.json</code> link means the site publishes that sidecar. An <code>included in draft vouch list</code> badge means this export would include the site in the generated <code>human.json</code> draft. Those are different signals.</p>
       <ul class="exports">
         <li><a href="./blogroll.opml">OPML</a></li>
@@ -132,6 +181,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
         <li><a href="./wander.js">wander.js</a></li>
         ${includeHumanJson ? '<li><a href="./human.json">human.json draft</a></li>' : ''}
       </ul>
+      ${tagIndex}
       <ul class="sites">
         ${items}
       </ul>
