@@ -5,12 +5,13 @@ A tiny Node CLI for turning a hand-kept list of sites into:
 - a human-readable blogroll page
 - an `OPML` file people can import into feed readers
 - a resolved JSON export with discovered feed URLs and optional `human.json` sidecars
-- a `smallweb.txt` export for feed-list surfaces that expect one URL per line
+- a `smallweb.txt` export for feed-list surfaces that expect one feed URL per line
+- a `bookmarks.html` export for browser/bookmark-manager import, including sites without feeds
 - a `wander.js` export you can drop into a [Wander](https://codeberg.org/susam/wander) console
 - an optional `human.json` export for publishing site-level vouches
 
 This came out of wanting a web neighborhood to feel more returnable and less algorithm-shaped.
-One hand-kept list can now feed subscription surfaces (`OPML`, `smallweb.txt`), lightweight discovery surfaces (`Wander`), and a small trust sidecar (`human.json`).
+One hand-kept list can now feed subscription surfaces (`OPML`, `smallweb.txt`), browser-friendly bookmark exports (`bookmarks.html`), lightweight discovery surfaces (`Wander`), and a small trust sidecar (`human.json`).
 
 ## Why
 
@@ -71,6 +72,7 @@ Outputs:
 - `blogroll.opml`
 - `index.html`
 - `smallweb.txt`
+- `bookmarks.html`
 - `sites.resolved.json`
 - `wander.js`
 - `human.json` (when `--human-url` is provided)
@@ -79,6 +81,8 @@ Outputs:
 The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
 
 `smallweb.txt` is a deliberately tiny newline-separated feed list, useful for compatibility with feed-list ecosystems like Kagi Small Web style tooling, quick diffing, or piping into other scripts.
+
+`bookmarks.html` is a browser-importable neighborhood export for the broader, messier case: it keeps sites that matter even when they do not publish feeds, which helps the list stay hospitable to stranger one-off pages and smaller handmade corners of the web.
 
 The HTML export also leans a little more browse-first than a flat dump:
 
