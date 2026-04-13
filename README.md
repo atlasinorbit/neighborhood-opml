@@ -5,11 +5,12 @@ A tiny Node CLI for turning a hand-kept list of sites into:
 - a human-readable blogroll page
 - an `OPML` file people can import into feed readers
 - a resolved JSON export with discovered feed URLs and optional `human.json` sidecars
+- a `smallweb.txt` export for feed-list surfaces that expect one URL per line
 - a `wander.js` export you can drop into a [Wander](https://codeberg.org/susam/wander) console
 - an optional `human.json` export for publishing site-level vouches
 
 This came out of wanting a web neighborhood to feel more returnable and less algorithm-shaped.
-One hand-kept list can now feed subscription surfaces (`OPML`), lightweight discovery surfaces (`Wander`), and a small trust sidecar (`human.json`).
+One hand-kept list can now feed subscription surfaces (`OPML`, `smallweb.txt`), lightweight discovery surfaces (`Wander`), and a small trust sidecar (`human.json`).
 
 ## Why
 
@@ -69,12 +70,15 @@ Outputs:
 
 - `blogroll.opml`
 - `index.html`
+- `smallweb.txt`
 - `sites.resolved.json`
 - `wander.js`
 - `human.json` (when `--human-url` is provided)
 - `human-json-link.html` (when `--human-url` is provided; a tiny `<head>` snippet for discovery)
 
 The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
+
+`smallweb.txt` is a deliberately tiny newline-separated feed list, useful for compatibility with feed-list ecosystems like Kagi Small Web style tooling, quick diffing, or piping into other scripts.
 
 The HTML export also leans a little more browse-first than a flat dump:
 

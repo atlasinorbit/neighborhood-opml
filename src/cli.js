@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { normalizeSites, renderHtml, renderOpml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet } from './render.js';
+import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderWander, renderHumanJson, renderHumanJsonLinkSnippet } from './render.js';
 import { discoverFeedUrl, discoverHumanJsonUrl } from './discover.js';
 
 function parseArgs(argv) {
@@ -45,6 +45,7 @@ async function main() {
   await fs.mkdir(args.out, { recursive: true });
   const title = args.title || 'Neighborhood';
   await fs.writeFile(path.join(args.out, 'blogroll.opml'), renderOpml({ title, sites }));
+  await fs.writeFile(path.join(args.out, 'smallweb.txt'), renderSmallwebTxt({ sites }));
   await fs.writeFile(path.join(args.out, 'index.html'), renderHtml({ title, sites, includeHumanJson: Boolean(args.humanUrl) }));
   await fs.writeFile(path.join(args.out, 'sites.resolved.json'), JSON.stringify(sites, null, 2) + '\n');
   await fs.writeFile(path.join(args.out, 'wander.js'), renderWander({ sites, consoles: args.consoles }));

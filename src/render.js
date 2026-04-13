@@ -177,6 +177,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       <p class="meta">A visible <code>publishes human.json</code> link means the site publishes that sidecar. An <code>included in draft vouch list</code> badge means this export would include the site in the generated <code>human.json</code> draft. Those are different signals.</p>
       <ul class="exports">
         <li><a href="./blogroll.opml">OPML</a></li>
+        <li><a href="./smallweb.txt">smallweb.txt</a></li>
         <li><a href="./sites.resolved.json">resolved JSON</a></li>
         <li><a href="./wander.js">wander.js</a></li>
         ${includeHumanJson ? '<li><a href="./human.json">human.json draft</a></li>' : ''}
@@ -189,6 +190,13 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
   </body>
 </html>
 `;
+}
+
+export function renderSmallwebTxt({ sites }) {
+  return sites
+    .filter((site) => site.feedUrl)
+    .map((site) => site.feedUrl)
+    .join('\n') + (sites.some((site) => site.feedUrl) ? '\n' : '');
 }
 
 export function renderWander({ sites, consoles = [] }) {
