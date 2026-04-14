@@ -179,6 +179,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
         <li><a href="./blogroll.opml">OPML</a></li>
         <li><a href="./smallweb.txt">smallweb.txt</a></li>
         <li><a href="./urls.txt">urls.txt</a></li>
+        <li><a href="./domains.txt">domains.txt</a></li>
         <li><a href="./bookmarks.html">bookmarks.html</a></li>
         <li><a href="./sites.resolved.json">resolved JSON</a></li>
         <li><a href="./wander.js">wander.js</a></li>
@@ -205,6 +206,22 @@ export function renderUrlsTxt({ sites }) {
   return sites
     .map((site) => site.url)
     .join('\n') + (sites.length ? '\n' : '');
+}
+
+export function renderDomainsTxt({ sites }) {
+  const domains = Array.from(new Set(
+    sites
+      .map((site) => {
+        try {
+          return new URL(site.url).hostname.toLowerCase();
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean)
+  )).sort((a, b) => a.localeCompare(b));
+
+  return domains.join('\n') + (domains.length ? '\n' : '');
 }
 
 export function renderBookmarksHtml({ title, sites, generatedAt = new Date().toISOString() }) {

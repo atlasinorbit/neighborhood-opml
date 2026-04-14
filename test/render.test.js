@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet } from '../src/render.js';
+import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet } from '../src/render.js';
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
@@ -54,6 +54,7 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
   assert.match(html, /\.\/blogroll\.opml/);
   assert.match(html, /\.\/smallweb\.txt/);
   assert.match(html, /\.\/urls\.txt/);
+  assert.match(html, /\.\/domains\.txt/);
   assert.match(html, /\.\/bookmarks\.html/);
   assert.match(html, /\.\/sites\.resolved\.json/);
   assert.match(html, /\.\/wander\.js/);
@@ -84,6 +85,18 @@ test('renderUrlsTxt emits all site urls as newline-separated text', () => {
   });
 
   assert.equal(txt, 'https://one.test\nhttps://two.test\n');
+});
+
+test('renderDomainsTxt emits unique sorted hostnames for quick review', () => {
+  const txt = renderDomainsTxt({
+    sites: [
+      { title: 'One', url: 'https://one.test/path', feedUrl: 'https://one.test/feed.xml', tags: [], notes: '' },
+      { title: 'Two', url: 'https://sub.two.test/', feedUrl: null, tags: [], notes: '' },
+      { title: 'Three', url: 'https://one.test/elsewhere', feedUrl: null, tags: [], notes: '' }
+    ]
+  });
+
+  assert.equal(txt, 'one.test\nsub.two.test\n');
 });
 
 test('renderBookmarksHtml emits a browser-importable bookmark export for all sites', () => {
