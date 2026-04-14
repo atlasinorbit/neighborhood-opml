@@ -178,6 +178,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       <ul class="exports">
         <li><a href="./blogroll.opml">OPML</a></li>
         <li><a href="./smallweb.txt">smallweb.txt</a></li>
+        <li><a href="./urls.txt">urls.txt</a></li>
         <li><a href="./bookmarks.html">bookmarks.html</a></li>
         <li><a href="./sites.resolved.json">resolved JSON</a></li>
         <li><a href="./wander.js">wander.js</a></li>
@@ -198,6 +199,12 @@ export function renderSmallwebTxt({ sites }) {
     .filter((site) => site.feedUrl)
     .map((site) => site.feedUrl)
     .join('\n') + (sites.some((site) => site.feedUrl) ? '\n' : '');
+}
+
+export function renderUrlsTxt({ sites }) {
+  return sites
+    .map((site) => site.url)
+    .join('\n') + (sites.length ? '\n' : '');
 }
 
 export function renderBookmarksHtml({ title, sites, generatedAt = new Date().toISOString() }) {
