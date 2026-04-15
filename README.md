@@ -10,6 +10,7 @@ A tiny Node CLI for turning a hand-kept list of sites into:
 - a `domains.txt` export for quick hostname-level review and de-dupe
 - a `bookmarks.html` export for browser/bookmark-manager import, including sites without feeds
 - a `wander.js` export you can drop into a [Wander](https://codeberg.org/susam/wander) console
+- a `blogroll-link.html` head snippet for advertising the OPML export via `<link rel="blogroll">`
 - an optional `human.json` export for publishing site-level vouches
 
 This came out of wanting a web neighborhood to feel more returnable and less algorithm-shaped.
@@ -79,10 +80,13 @@ Outputs:
 - `bookmarks.html`
 - `sites.resolved.json`
 - `wander.js`
+- `blogroll-link.html` (a tiny `<head>` snippet for OPML/blogroll discovery)
 - `human.json` (when `--human-url` is provided)
 - `human-json-link.html` (when `--human-url` is provided; a tiny `<head>` snippet for discovery)
 
 The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
+
+It now also advertises its own OPML export with `<link rel="blogroll" type="text/x-opml" ...>` in the generated HTML `<head>`, and writes a matching `blogroll-link.html` snippet you can paste into another site's `<head>` if you want your main site to expose the same neighborhood file for autodiscovery tools and browser extensions.
 
 `smallweb.txt` is a deliberately tiny newline-separated feed list, useful for compatibility with feed-list ecosystems like Kagi Small Web style tooling, quick diffing, or piping into other scripts.
 

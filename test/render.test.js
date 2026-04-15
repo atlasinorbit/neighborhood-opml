@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet } from '../src/render.js';
+import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from '../src/render.js';
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
@@ -51,6 +51,8 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
   assert.match(html, /publishes human\.json ↗/);
   assert.match(html, /included in draft vouch list/);
   assert.match(html, /different signals/);
+  assert.match(html, /rel="blogroll"/);
+  assert.match(html, /type="text\/x-opml"/);
   assert.match(html, /\.\/blogroll\.opml/);
   assert.match(html, /\.\/smallweb\.txt/);
   assert.match(html, /\.\/urls\.txt/);
@@ -157,4 +159,14 @@ test('renderHumanJsonLinkSnippet emits the discovery tag for page head integrati
   assert.match(snippet, /Add this to the <head>/);
   assert.match(snippet, /rel="human-json"/);
   assert.match(snippet, /href="\.\/human\.json"/);
+});
+
+test('renderBlogrollLinkSnippet emits the discovery tag for blogroll head integration', () => {
+  const snippet = renderBlogrollLinkSnippet({ title: 'Atlas Neighborhood' });
+
+  assert.match(snippet, /Add this to the <head>/);
+  assert.match(snippet, /rel="blogroll"/);
+  assert.match(snippet, /type="text\/x-opml"/);
+  assert.match(snippet, /title="Atlas Neighborhood"/);
+  assert.match(snippet, /href="\.\/blogroll\.opml"/);
 });

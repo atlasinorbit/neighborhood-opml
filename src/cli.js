@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet } from './render.js';
+import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from './render.js';
 import { discoverFeedUrl, discoverHumanJsonUrl } from './discover.js';
 
 function parseArgs(argv) {
@@ -52,6 +52,7 @@ async function main() {
   await fs.writeFile(path.join(args.out, 'index.html'), renderHtml({ title, sites, includeHumanJson: Boolean(args.humanUrl) }));
   await fs.writeFile(path.join(args.out, 'sites.resolved.json'), JSON.stringify(sites, null, 2) + '\n');
   await fs.writeFile(path.join(args.out, 'wander.js'), renderWander({ sites, consoles: args.consoles }));
+  await fs.writeFile(path.join(args.out, 'blogroll-link.html'), renderBlogrollLinkSnippet({ title }));
   if (args.humanUrl) {
     await fs.writeFile(path.join(args.out, 'human.json'), renderHumanJson({ siteUrl: args.humanUrl, sites }));
     await fs.writeFile(path.join(args.out, 'human-json-link.html'), renderHumanJsonLinkSnippet());

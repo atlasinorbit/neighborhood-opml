@@ -141,6 +141,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${escapeHtml(title)}</title>
+    <link rel="blogroll" type="text/x-opml" title="${escapeHtml(title)}" href="./blogroll.opml" />
     <style>
       :root { color-scheme: dark light; }
       body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; background: #0b1020; color: #e6edf3; }
@@ -265,4 +266,8 @@ export function renderHumanJson({ siteUrl, sites, version = '0.1.1', vouchedAt =
 
 export function renderHumanJsonLinkSnippet({ href = './human.json' } = {}) {
   return `<!-- Add this to the <head> of pages covered by your human.json claim. -->\n<link rel="human-json" href="${escapeHtml(href)}" />\n`;
+}
+
+export function renderBlogrollLinkSnippet({ href = './blogroll.opml', title = 'Neighborhood' } = {}) {
+  return `<!-- Add this to the <head> of pages that should advertise your blogroll export. -->\n<link rel="blogroll" type="text/x-opml" title="${escapeHtml(title)}" href="${escapeHtml(href)}" />\n`;
 }
