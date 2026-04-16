@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from '../src/render.js';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
@@ -169,4 +176,32 @@ test('renderBlogrollLinkSnippet emits the discovery tag for blogroll head integr
   assert.match(snippet, /type="text\/x-opml"/);
   assert.match(snippet, /title="Atlas Neighborhood"/);
   assert.match(snippet, /href="\.\/blogroll\.opml"/);
+});
+
+test('cli can emit a conventional .well-known recommendations.opml export', async () => {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'neighborhood-opml-'));
+  const inputPath = path.join(tempDir, 'sites.json');
+  const outDir = path.join(tempDir, 'dist');
+
+  await fs.writeFile(inputPath, JSON.stringify([
+    {
+      title: 'One',
+      url: 'https://one.test',
+      feedUrl: 'https://one.test/feed.xml'
+    }
+  ], null, 2));
+
+  await execFileAsync(process.execPath, [
+    './src/cli.js',
+    '--input', inputPath,
+    '--out', outDir,
+    '--title', 'Atlas Neighborhood',
+    '--well-known'
+  ], {
+    cwd: process.cwd()
+  });
+
+  const opml = await fs.readFile(path.join(outDir, '.well-known', 'recommendations.opml'), 'utf8');
+  assert.match(opml, /<title>Atlas Neighborhood<\/title>/);
+  assert.match(opml, /xmlUrl="https:\/\/one.test\/feed.xml"/);
 });

@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "test": "node --test",
-    "build:example": "node ./src/cli.js --input ./example/sites.json --out ./example/dist --title 'Atlas Neighborhood' --discover --discover-human --console 'https://susam.net/wander/' --human-url 'https://atlasinorbit.com/'"
+    "build:example": "node ./src/cli.js --input ./example/sites.json --out ./example/dist --title 'Atlas Neighborhood' --discover --discover-human --console 'https://susam.net/wander/' --human-url 'https://atlasinorbit.com/' --well-known"
   },
   "keywords": [
     "blogroll",
