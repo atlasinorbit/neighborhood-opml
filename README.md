@@ -11,11 +11,11 @@ A tiny Node CLI for turning a hand-kept list of sites into:
 - a `bookmarks.html` export for browser/bookmark-manager import, including sites without feeds
 - a `wander.js` export you can drop into a [Wander](https://codeberg.org/susam/wander) console
 - a `blogroll-link.html` head snippet for advertising the OPML export via `<link rel="blogroll">`
-- an optional `.well-known/recommendations.opml` export for conventional autodiscovery paths
+- an optional `.well-known/recommendations.opml` and `.well-known/recommendations.json` export for conventional autodiscovery paths
 - an optional `human.json` export for publishing site-level vouches
 
 This came out of wanting a web neighborhood to feel more returnable and less algorithm-shaped.
-One hand-kept list can now feed subscription surfaces (`OPML`, `smallweb.txt`), full-neighborhood plain-text handoffs (`urls.txt`), hostname-level review/export (`domains.txt`), browser-friendly bookmark exports (`bookmarks.html`), lightweight discovery surfaces (`Wander`), and a small trust sidecar (`human.json`).
+One hand-kept list can now feed subscription surfaces (`OPML`, `recommendations.json`, `smallweb.txt`), full-neighborhood plain-text handoffs (`urls.txt`), hostname-level review/export (`domains.txt`), browser-friendly bookmark exports (`bookmarks.html`), lightweight discovery surfaces (`Wander`), and a small trust sidecar (`human.json`).
 
 ## Why
 
@@ -75,6 +75,7 @@ node ./src/cli.js \
 Outputs:
 
 - `blogroll.opml`
+- `recommendations.json`
 - `index.html`
 - `smallweb.txt`
 - `urls.txt`
@@ -83,15 +84,17 @@ Outputs:
 - `sites.resolved.json`
 - `wander.js`
 - `blogroll-link.html` (a tiny `<head>` snippet for OPML/blogroll discovery)
-- `.well-known/recommendations.opml` (when `--well-known` is provided; a conventional path some blogroll tools look for)
+- `.well-known/recommendations.opml` and `.well-known/recommendations.json` (when `--well-known` is provided; conventional paths some blogroll/recommendation tools look for)
 - `human.json` (when `--human-url` is provided)
 - `human-json-link.html` (when `--human-url` is provided; a tiny `<head>` snippet for discovery)
 
 The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
 
+`recommendations.json` is a deliberately plain machine-facing companion to the OPML export: a small JSON list of feed-bearing recommendations with title, site URL, feed URL, tags, and optional notes. It exists for tooling that wants something simpler than OPML without giving up the boring conventional path story.
+
 It now also advertises its own OPML export with `<link rel="blogroll" type="text/x-opml" ...>` in the generated HTML `<head>`, and writes a matching `blogroll-link.html` snippet you can paste into another site's `<head>` if you want your main site to expose the same neighborhood file for autodiscovery tools and browser extensions.
 
-If you pass `--well-known`, the CLI also writes the same OPML payload to `.well-known/recommendations.opml`, which gives you a conventional stable path for crawlers and blogroll tooling that probe that location directly.
+If you pass `--well-known`, the CLI also writes the same recommendation set to `.well-known/recommendations.opml` and `.well-known/recommendations.json`, which gives you conventional stable paths for crawlers and recommendation/blogroll tooling that probe those locations directly.
 
 `smallweb.txt` is a deliberately tiny newline-separated feed list, useful for compatibility with feed-list ecosystems like Kagi Small Web style tooling, quick diffing, or piping into other scripts.
 

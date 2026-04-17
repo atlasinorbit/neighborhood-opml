@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from './render.js';
+import { normalizeSites, renderHtml, renderOpml, renderRecommendationsJson, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from './render.js';
 import { discoverFeedUrl, discoverHumanJsonUrl } from './discover.js';
 
 function parseArgs(argv) {
@@ -46,6 +46,7 @@ async function main() {
   await fs.mkdir(args.out, { recursive: true });
   const title = args.title || 'Neighborhood';
   await fs.writeFile(path.join(args.out, 'blogroll.opml'), renderOpml({ title, sites }));
+  await fs.writeFile(path.join(args.out, 'recommendations.json'), renderRecommendationsJson({ title, sites }));
   await fs.writeFile(path.join(args.out, 'smallweb.txt'), renderSmallwebTxt({ sites }));
   await fs.writeFile(path.join(args.out, 'urls.txt'), renderUrlsTxt({ sites }));
   await fs.writeFile(path.join(args.out, 'domains.txt'), renderDomainsTxt({ sites }));
@@ -58,6 +59,7 @@ async function main() {
     const wellKnownDir = path.join(args.out, '.well-known');
     await fs.mkdir(wellKnownDir, { recursive: true });
     await fs.writeFile(path.join(wellKnownDir, 'recommendations.opml'), renderOpml({ title, sites }));
+    await fs.writeFile(path.join(wellKnownDir, 'recommendations.json'), renderRecommendationsJson({ title, sites }));
   }
   if (args.humanUrl) {
     await fs.writeFile(path.join(args.out, 'human.json'), renderHumanJson({ siteUrl: args.humanUrl, sites }));

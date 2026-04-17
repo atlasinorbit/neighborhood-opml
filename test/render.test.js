@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeSites, renderHtml, renderOpml, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from '../src/render.js';
+import { normalizeSites, renderHtml, renderOpml, renderRecommendationsJson, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from '../src/render.js';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -61,6 +61,7 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
   assert.match(html, /rel="blogroll"/);
   assert.match(html, /type="text\/x-opml"/);
   assert.match(html, /\.\/blogroll\.opml/);
+  assert.match(html, /\.\/recommendations\.json/);
   assert.match(html, /\.\/smallweb\.txt/);
   assert.match(html, /\.\/urls\.txt/);
   assert.match(html, /\.\/domains\.txt/);
@@ -71,6 +72,31 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
 
   const vouchBadgeCount = (html.match(/class="vouch">included in draft vouch list/g) || []).length;
   assert.equal(vouchBadgeCount, 1);
+});
+
+test('renderRecommendationsJson emits a plain machine-facing recommendation export', () => {
+  const json = renderRecommendationsJson({
+    title: 'Atlas Neighborhood',
+    generatedAt: '2026-04-17T20:30:00.000Z',
+    sites: [
+      { title: 'One', url: 'https://one.test', feedUrl: 'https://one.test/feed.xml', tags: ['math'], notes: 'a keeper' },
+      { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'no feed yet' }
+    ]
+  });
+
+  const payload = JSON.parse(json);
+  assert.equal(payload.version, '1');
+  assert.equal(payload.title, 'Atlas Neighborhood');
+  assert.equal(payload.generated_at, '2026-04-17T20:30:00.000Z');
+  assert.deepEqual(payload.recommendations, [
+    {
+      title: 'One',
+      url: 'https://one.test',
+      feed_url: 'https://one.test/feed.xml',
+      tags: ['math'],
+      notes: 'a keeper'
+    }
+  ]);
 });
 
 test('renderSmallwebTxt emits only feed urls as newline-separated text', () => {
@@ -178,7 +204,7 @@ test('renderBlogrollLinkSnippet emits the discovery tag for blogroll head integr
   assert.match(snippet, /href="\.\/blogroll\.opml"/);
 });
 
-test('cli can emit a conventional .well-known recommendations.opml export', async () => {
+test('cli can emit conventional .well-known recommendation exports', async () => {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'neighborhood-opml-'));
   const inputPath = path.join(tempDir, 'sites.json');
   const outDir = path.join(tempDir, 'dist');
@@ -204,4 +230,15 @@ test('cli can emit a conventional .well-known recommendations.opml export', asyn
   const opml = await fs.readFile(path.join(outDir, '.well-known', 'recommendations.opml'), 'utf8');
   assert.match(opml, /<title>Atlas Neighborhood<\/title>/);
   assert.match(opml, /xmlUrl="https:\/\/one.test\/feed.xml"/);
+
+  const json = JSON.parse(await fs.readFile(path.join(outDir, '.well-known', 'recommendations.json'), 'utf8'));
+  assert.equal(json.title, 'Atlas Neighborhood');
+  assert.deepEqual(json.recommendations, [
+    {
+      title: 'One',
+      url: 'https://one.test',
+      feed_url: 'https://one.test/feed.xml',
+      tags: []
+    }
+  ]);
 });

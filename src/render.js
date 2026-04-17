@@ -70,6 +70,25 @@ ${outlines}
 `;
 }
 
+export function renderRecommendationsJson({ title, sites, generatedAt = new Date().toISOString() }) {
+  const recommendations = sites
+    .filter((site) => site.feedUrl)
+    .map((site) => ({
+      title: site.title,
+      url: site.url,
+      feed_url: site.feedUrl,
+      tags: site.tags,
+      notes: site.notes || undefined,
+    }));
+
+  return `${JSON.stringify({
+    version: '1',
+    title,
+    generated_at: generatedAt,
+    recommendations,
+  }, null, 2)}\n`;
+}
+
 export function renderHtml({ title, sites, generatedAt = new Date().toISOString(), includeHumanJson = false }) {
   const withFeeds = sites.filter((site) => site.feedUrl).length;
   const withHumanJson = sites.filter((site) => site.humanJsonUrl).length;
@@ -178,6 +197,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       <p class="meta">A visible <code>publishes human.json</code> link means the site publishes that sidecar. An <code>included in draft vouch list</code> badge means this export would include the site in the generated <code>human.json</code> draft. Those are different signals.</p>
       <ul class="exports">
         <li><a href="./blogroll.opml">OPML</a></li>
+        <li><a href="./recommendations.json">recommendations.json</a></li>
         <li><a href="./smallweb.txt">smallweb.txt</a></li>
         <li><a href="./urls.txt">urls.txt</a></li>
         <li><a href="./domains.txt">domains.txt</a></li>
