@@ -11,10 +11,11 @@ const execFileAsync = promisify(execFile);
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
-    { title: 'Example', url: 'https://example.com', humanJsonUrl: 'https://example.com/human.json', tags: ['one'], notes: 'hello', human: { vouch: false, vouchedAt: '2026-03-31' } }
+    { title: 'Example', url: 'https://example.com', feedType: 'json', humanJsonUrl: 'https://example.com/human.json', tags: ['one'], notes: 'hello', human: { vouch: false, vouchedAt: '2026-03-31' } }
   ]);
 
   assert.equal(sites[0].feedUrl, null);
+  assert.equal(sites[0].feedType, 'json');
   assert.equal(sites[0].humanJsonUrl, 'https://example.com/human.json');
   assert.deepEqual(sites[0].tags, ['one']);
   assert.equal(sites[0].notes, 'hello');
@@ -40,8 +41,8 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
     generatedAt: '2026-03-28T00:00:00.000Z',
     includeHumanJson: true,
     sites: [
-      { title: 'Two', url: 'https://two.test', feedUrl: null, humanJsonUrl: 'https://two.test/human.json', tags: ['quiet'], notes: 'still worth returning to', human: null },
-      { title: 'Three', url: 'https://three.test', feedUrl: 'https://three.test/feed.xml', humanJsonUrl: null, tags: ['math'], notes: '', human: { vouch: false } }
+      { title: 'Two', url: 'https://two.test', feedUrl: null, feedType: null, humanJsonUrl: 'https://two.test/human.json', tags: ['quiet'], notes: 'still worth returning to', human: null },
+      { title: 'Three', url: 'https://three.test', feedUrl: 'https://three.test/feed.xml', feedType: 'json', humanJsonUrl: null, tags: ['math'], notes: '', human: { vouch: false } }
     ]
   });
 
@@ -56,6 +57,7 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
   assert.match(html, /1 publishing human\.json/);
   assert.match(html, /1 in draft vouch list/);
   assert.match(html, /publishes human\.json ↗/);
+  assert.match(html, /JSON feed ↗/);
   assert.match(html, /included in draft vouch list/);
   assert.match(html, /different signals/);
   assert.match(html, /rel="blogroll"/);
@@ -79,8 +81,8 @@ test('renderRecommendationsJson emits a plain machine-facing recommendation expo
     title: 'Atlas Neighborhood',
     generatedAt: '2026-04-17T20:30:00.000Z',
     sites: [
-      { title: 'One', url: 'https://one.test', feedUrl: 'https://one.test/feed.xml', tags: ['math'], notes: 'a keeper' },
-      { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'no feed yet' }
+      { title: 'One', url: 'https://one.test', feedUrl: 'https://one.test/feed.xml', feedType: 'atom', tags: ['math'], notes: 'a keeper' },
+      { title: 'Two', url: 'https://two.test', feedUrl: null, feedType: null, tags: ['quiet'], notes: 'no feed yet' }
     ]
   });
 
@@ -93,6 +95,7 @@ test('renderRecommendationsJson emits a plain machine-facing recommendation expo
       title: 'One',
       url: 'https://one.test',
       feed_url: 'https://one.test/feed.xml',
+      feed_type: 'atom',
       tags: ['math'],
       notes: 'a keeper'
     }
@@ -156,13 +159,15 @@ test('renderWander emits consoles and pages for Wander console use', () => {
   const js = renderWander({
     consoles: ['https://susam.net/wander/'],
     sites: [
-      { title: 'Two', url: 'https://two.test', feedUrl: null, tags: ['quiet'], notes: 'still worth returning to' }
+      { title: 'Two', url: 'https://two.test', feedUrl: 'https://two.test/feed.json', feedType: 'json', tags: ['quiet'], notes: 'still worth returning to' }
     ]
   });
 
   assert.match(js, /const wander =/);
   assert.match(js, /https:\/\/susam.net\/wander\//);
   assert.match(js, /https:\/\/two.test/);
+  assert.match(js, /https:\/\/two.test\/feed.json/);
+  assert.match(js, /"feedType": "json"/);
   assert.match(js, /still worth returning to/);
 });
 
@@ -178,7 +183,7 @@ test('renderHumanJson emits a draft vouch graph from the site list', () => {
   });
 
   const payload = JSON.parse(json);
-  assert.equal(payload.version, '0.1.1');
+  assert.equal(payload.version, '0.1.2');
   assert.equal(payload.url, 'https://atlasinorbit.com/');
   assert.deepEqual(payload.vouches, [
     { url: 'https://two.test', vouched_at: '2026-03-30' },

@@ -31,6 +31,7 @@ A lot of blogroll tooling is either tied to one CMS or heavier than it needs to 
     "title": "Example Site",
     "url": "https://example.com/",
     "feedUrl": "https://example.com/feed.xml",
+    "feedType": "rss",
     "humanJsonUrl": "https://example.com/human.json",
     "tags": ["notes", "design"],
     "notes": "Optional sentence about why this site matters."
@@ -41,6 +42,7 @@ A lot of blogroll tooling is either tied to one CMS or heavier than it needs to 
 Only `title` and `url` are required.
 
 - `feedUrl` may be set manually or discovered with `--discover`
+- `feedType` is optional metadata (`rss`, `atom`, or `json`) and is filled automatically when discovery succeeds
 - `humanJsonUrl` may be set manually or discovered with `--discover-human`
 
 Optional `human` metadata lets you separate a general neighborhood list from the smaller set of sites you are actually willing to vouch for in `human.json`:
@@ -90,7 +92,7 @@ Outputs:
 
 The generated HTML page includes links to its sibling exports, so the neighborhood page can also act as a simple handoff surface instead of a dead-end display.
 
-`recommendations.json` is a deliberately plain machine-facing companion to the OPML export: a small JSON list of feed-bearing recommendations with title, site URL, feed URL, tags, and optional notes. It exists for tooling that wants something simpler than OPML without giving up the boring conventional path story.
+`recommendations.json` is a deliberately plain machine-facing companion to the OPML export: a small JSON list of feed-bearing recommendations with title, site URL, feed URL, optional feed type, tags, and optional notes. It exists for tooling that wants something simpler than OPML without giving up the boring conventional path story.
 
 It now also advertises its own OPML export with `<link rel="blogroll" type="text/x-opml" ...>` in the generated HTML `<head>`, and writes a matching `blogroll-link.html` snippet you can paste into another site's `<head>` if you want your main site to expose the same neighborhood file for autodiscovery tools and browser extensions.
 
@@ -121,8 +123,8 @@ That keeps discovery and trust adjacent without flattening them into the same th
 
 If `--discover` is enabled, the CLI will try to find a feed by:
 
-1. checking `<link rel="alternate" ...>` tags for RSS/Atom
-2. probing common feed paths like `/feed`, `/rss.xml`, `/atom.xml`, and `/index.xml`
+1. checking `<link rel="alternate" ...>` tags for RSS, Atom, or JSON Feed (in whatever attribute order the page uses)
+2. probing common feed paths like `/feed`, `/rss.xml`, `/atom.xml`, `/feed.json`, and `/index.xml`
 
 If nothing is found, the HTML export still includes the site and marks the feed as missing.
 

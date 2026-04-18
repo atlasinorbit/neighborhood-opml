@@ -44,6 +44,7 @@ export function normalizeSites(rawSites) {
       title: String(site.title),
       url: String(site.url),
       feedUrl: site.feedUrl ? String(site.feedUrl) : null,
+      feedType: site.feedType ? String(site.feedType) : null,
       humanJsonUrl: site.humanJsonUrl ? String(site.humanJsonUrl) : null,
       tags: Array.isArray(site.tags) ? site.tags.map(String) : [],
       notes: site.notes ? String(site.notes) : '',
@@ -77,6 +78,7 @@ export function renderRecommendationsJson({ title, sites, generatedAt = new Date
       title: site.title,
       url: site.url,
       feed_url: site.feedUrl,
+      feed_type: site.feedType || undefined,
       tags: site.tags,
       notes: site.notes || undefined,
     }));
@@ -115,8 +117,9 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
     const tags = site.tags.length
       ? `<ul class="tags">${site.tags.map((tag) => `<li><a href="#tag-${escapeHtml(slugifyTag(tag))}">${escapeHtml(tag)}</a></li>`).join('')}</ul>`
       : '';
+    const feedLabel = site.feedType === 'json' ? 'JSON feed ↗' : site.feedType === 'atom' ? 'Atom feed ↗' : 'feed ↗';
     const feed = site.feedUrl
-      ? `<a class="feed" href="${escapeHtml(site.feedUrl)}">feed ↗</a>`
+      ? `<a class="feed" href="${escapeHtml(site.feedUrl)}">${feedLabel}</a>`
       : '<span class="feed missing">feed missing</span>';
     const notes = site.notes ? `<p>${escapeHtml(site.notes)}</p>` : '';
     const humanJson = site.humanJsonUrl
@@ -255,6 +258,8 @@ export function renderWander({ sites, consoles = [] }) {
   const pages = sites.map((site) => ({
     title: site.title,
     url: site.url,
+    feedUrl: site.feedUrl,
+    feedType: site.feedType,
     tags: site.tags,
     notes: site.notes,
   }));
@@ -267,7 +272,7 @@ export function renderWander({ sites, consoles = [] }) {
   return `const wander = ${JSON.stringify(payload, null, 2)};\n`;
 }
 
-export function renderHumanJson({ siteUrl, sites, version = '0.1.1', vouchedAt = new Date().toISOString().slice(0, 10) }) {
+export function renderHumanJson({ siteUrl, sites, version = '0.1.2', vouchedAt = new Date().toISOString().slice(0, 10) }) {
   const vouches = sites
     .filter((site) => site.human?.vouch !== false)
     .map((site) => ({

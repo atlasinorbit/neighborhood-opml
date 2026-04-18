@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { normalizeSites, renderHtml, renderOpml, renderRecommendationsJson, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from './render.js';
-import { discoverFeedUrl, discoverHumanJsonUrl } from './discover.js';
+import { discoverFeed, discoverHumanJsonUrl } from './discover.js';
 
 function parseArgs(argv) {
   const args = { discover: false, discoverHuman: false, consoles: [], wellKnown: false };
@@ -31,7 +31,9 @@ async function main() {
   if (args.discover || args.discoverHuman) {
     for (const site of sites) {
       if (args.discover && !site.feedUrl) {
-        site.feedUrl = await discoverFeedUrl(site.url);
+        const discovered = await discoverFeed(site.url);
+        site.feedUrl = discovered.feedUrl;
+        site.feedType = discovered.feedType;
         if (!site.feedUrl) {
           console.warn(`Could not discover a feed for ${site.url}`);
         }
