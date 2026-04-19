@@ -45,6 +45,7 @@ export function normalizeSites(rawSites) {
       url: String(site.url),
       feedUrl: site.feedUrl ? String(site.feedUrl) : null,
       feedType: site.feedType ? String(site.feedType) : null,
+      blogrollUrl: site.blogrollUrl ? String(site.blogrollUrl) : null,
       humanJsonUrl: site.humanJsonUrl ? String(site.humanJsonUrl) : null,
       tags: Array.isArray(site.tags) ? site.tags.map(String) : [],
       notes: site.notes ? String(site.notes) : '',
@@ -93,6 +94,7 @@ export function renderRecommendationsJson({ title, sites, generatedAt = new Date
 
 export function renderHtml({ title, sites, generatedAt = new Date().toISOString(), includeHumanJson = false }) {
   const withFeeds = sites.filter((site) => site.feedUrl).length;
+  const withBlogrolls = sites.filter((site) => site.blogrollUrl).length;
   const withHumanJson = sites.filter((site) => site.humanJsonUrl).length;
   const draftVouchCount = includeHumanJson
     ? sites.filter((site) => site.human?.vouch !== false).length
@@ -122,6 +124,9 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       ? `<a class="feed" href="${escapeHtml(site.feedUrl)}">${feedLabel}</a>`
       : '<span class="feed missing">feed missing</span>';
     const notes = site.notes ? `<p>${escapeHtml(site.notes)}</p>` : '';
+    const blogroll = site.blogrollUrl
+      ? `<a class="blogroll" href="${escapeHtml(site.blogrollUrl)}">publishes blogroll ↗</a>`
+      : '';
     const humanJson = site.humanJsonUrl
       ? `<a class="human-json" href="${escapeHtml(site.humanJsonUrl)}">publishes human.json ↗</a>`
       : '';
@@ -134,6 +139,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
         <a class="title" href="${escapeHtml(site.url)}">${escapeHtml(site.title)}</a>
         <div class="signals">
           ${feed}
+          ${blogroll}
           ${humanJson}
           ${draftVouch}
         </div>
@@ -146,6 +152,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
   const stats = [
     `${sites.length} sites`,
     `${withFeeds} with feeds`,
+    `${withBlogrolls} publishing blogrolls`,
     `${withHumanJson} publishing human.json`,
     includeHumanJson ? `${draftVouchCount} in draft vouch list` : null,
   ].filter(Boolean).map((value) => `<li>${escapeHtml(value)}</li>`).join('');
@@ -177,7 +184,7 @@ export function renderHtml({ title, sites, generatedAt = new Date().toISOString(
       a { color: #9bd1ff; }
       .title { font-weight: 700; text-decoration: none; }
       .signals { display: flex; gap: .75rem; flex-wrap: wrap; align-items: baseline; }
-      .feed, .human-json, .vouch { font-size: .95rem; }
+      .feed, .blogroll, .human-json, .vouch { font-size: .95rem; }
       .feed.missing { opacity: .55; }
       .vouch { border: 1px solid rgba(155,209,255,.28); border-radius: 999px; padding: .12rem .55rem; color: #cfe9ff; background: rgba(155,209,255,.08); }
       .tags, .stats, .tag-index { display: flex; gap: .5rem; flex-wrap: wrap; list-style: none; padding: 0; }

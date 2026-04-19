@@ -2,13 +2,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { normalizeSites, renderHtml, renderOpml, renderRecommendationsJson, renderSmallwebTxt, renderUrlsTxt, renderDomainsTxt, renderBookmarksHtml, renderWander, renderHumanJson, renderHumanJsonLinkSnippet, renderBlogrollLinkSnippet } from './render.js';
-import { discoverFeed, discoverHumanJsonUrl } from './discover.js';
+import { discoverFeed, discoverBlogrollUrl, discoverHumanJsonUrl } from './discover.js';
 
 function parseArgs(argv) {
-  const args = { discover: false, discoverHuman: false, consoles: [], wellKnown: false };
+  const args = { discover: false, discoverBlogroll: false, discoverHuman: false, consoles: [], wellKnown: false };
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (token === '--discover') args.discover = true;
+    else if (token === '--discover-blogroll') args.discoverBlogroll = true;
     else if (token === '--discover-human') args.discoverHuman = true;
     else if (token === '--input') args.input = argv[++i];
     else if (token === '--out') args.out = argv[++i];
@@ -18,7 +19,7 @@ function parseArgs(argv) {
     else if (token === '--well-known') args.wellKnown = true;
   }
   if (!args.input || !args.out) {
-    throw new Error('Usage: neighborhood-opml --input ./sites.json --out ./dist [--title "My Neighborhood"] [--discover] [--discover-human] [--console https://example.com/wander/] [--human-url https://example.com/] [--well-known]');
+    throw new Error('Usage: neighborhood-opml --input ./sites.json --out ./dist [--title "My Neighborhood"] [--discover] [--discover-blogroll] [--discover-human] [--console https://example.com/wander/] [--human-url https://example.com/] [--well-known]');
   }
   return args;
 }
@@ -28,7 +29,7 @@ async function main() {
   const raw = JSON.parse(await fs.readFile(args.input, 'utf8'));
   const sites = normalizeSites(raw);
 
-  if (args.discover || args.discoverHuman) {
+  if (args.discover || args.discoverBlogroll || args.discoverHuman) {
     for (const site of sites) {
       if (args.discover && !site.feedUrl) {
         const discovered = await discoverFeed(site.url);
@@ -37,6 +38,10 @@ async function main() {
         if (!site.feedUrl) {
           console.warn(`Could not discover a feed for ${site.url}`);
         }
+      }
+
+      if (args.discoverBlogroll && !site.blogrollUrl) {
+        site.blogrollUrl = await discoverBlogrollUrl(site.url);
       }
 
       if (args.discoverHuman && !site.humanJsonUrl) {
@@ -69,10 +74,11 @@ async function main() {
   }
 
   const withFeeds = sites.filter((site) => site.feedUrl).length;
+  const withBlogrolls = sites.filter((site) => site.blogrollUrl).length;
   const withHumanJson = sites.filter((site) => site.humanJsonUrl).length;
   const humanJsonNote = args.humanUrl ? ', human.json enabled' : '';
   const wellKnownNote = args.wellKnown ? ', .well-known/recommendations.opml enabled' : '';
-  console.log(`Wrote ${sites.length} sites to ${args.out} (${withFeeds} with feeds, ${withHumanJson} publishing human.json, ${args.consoles.length} consoles${humanJsonNote}${wellKnownNote}).`);
+  console.log(`Wrote ${sites.length} sites to ${args.out} (${withFeeds} with feeds, ${withBlogrolls} publishing blogrolls, ${withHumanJson} publishing human.json, ${args.consoles.length} consoles${humanJsonNote}${wellKnownNote}).`);
 }
 
 main().catch((error) => {

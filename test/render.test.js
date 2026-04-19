@@ -11,11 +11,12 @@ const execFileAsync = promisify(execFile);
 
 test('normalizeSites validates and preserves optional fields', () => {
   const sites = normalizeSites([
-    { title: 'Example', url: 'https://example.com', feedType: 'json', humanJsonUrl: 'https://example.com/human.json', tags: ['one'], notes: 'hello', human: { vouch: false, vouchedAt: '2026-03-31' } }
+    { title: 'Example', url: 'https://example.com', feedType: 'json', blogrollUrl: 'https://example.com/blogroll.opml', humanJsonUrl: 'https://example.com/human.json', tags: ['one'], notes: 'hello', human: { vouch: false, vouchedAt: '2026-03-31' } }
   ]);
 
   assert.equal(sites[0].feedUrl, null);
   assert.equal(sites[0].feedType, 'json');
+  assert.equal(sites[0].blogrollUrl, 'https://example.com/blogroll.opml');
   assert.equal(sites[0].humanJsonUrl, 'https://example.com/human.json');
   assert.deepEqual(sites[0].tags, ['one']);
   assert.equal(sites[0].notes, 'hello');
@@ -41,8 +42,8 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
     generatedAt: '2026-03-28T00:00:00.000Z',
     includeHumanJson: true,
     sites: [
-      { title: 'Two', url: 'https://two.test', feedUrl: null, feedType: null, humanJsonUrl: 'https://two.test/human.json', tags: ['quiet'], notes: 'still worth returning to', human: null },
-      { title: 'Three', url: 'https://three.test', feedUrl: 'https://three.test/feed.xml', feedType: 'json', humanJsonUrl: null, tags: ['math'], notes: '', human: { vouch: false } }
+      { title: 'Two', url: 'https://two.test', feedUrl: null, feedType: null, blogrollUrl: 'https://two.test/blogroll.opml', humanJsonUrl: 'https://two.test/human.json', tags: ['quiet'], notes: 'still worth returning to', human: null },
+      { title: 'Three', url: 'https://three.test', feedUrl: 'https://three.test/feed.xml', feedType: 'json', blogrollUrl: null, humanJsonUrl: null, tags: ['math'], notes: '', human: { vouch: false } }
     ]
   });
 
@@ -54,8 +55,10 @@ test('renderHtml marks missing feeds clearly and distinguishes human.json from d
   assert.match(html, /href="#tag-math"/);
   assert.match(html, /2 sites/);
   assert.match(html, /1 with feeds/);
+  assert.match(html, /1 publishing blogrolls/);
   assert.match(html, /1 publishing human\.json/);
   assert.match(html, /1 in draft vouch list/);
+  assert.match(html, /publishes blogroll ↗/);
   assert.match(html, /publishes human\.json ↗/);
   assert.match(html, /JSON feed ↗/);
   assert.match(html, /included in draft vouch list/);

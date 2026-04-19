@@ -4,7 +4,7 @@ A tiny Node CLI for turning a hand-kept list of sites into:
 
 - a human-readable blogroll page
 - an `OPML` file people can import into feed readers
-- a resolved JSON export with discovered feed URLs and optional `human.json` sidecars
+- a resolved JSON export with discovered feed URLs, optional blogroll URLs, and optional `human.json` sidecars
 - a `smallweb.txt` export for feed-list surfaces that expect one feed URL per line
 - a `urls.txt` export for the full neighborhood as one site URL per line
 - a `domains.txt` export for quick hostname-level review and de-dupe
@@ -32,6 +32,7 @@ A lot of blogroll tooling is either tied to one CMS or heavier than it needs to 
     "url": "https://example.com/",
     "feedUrl": "https://example.com/feed.xml",
     "feedType": "rss",
+    "blogrollUrl": "https://example.com/blogroll.opml",
     "humanJsonUrl": "https://example.com/human.json",
     "tags": ["notes", "design"],
     "notes": "Optional sentence about why this site matters."
@@ -43,6 +44,7 @@ Only `title` and `url` are required.
 
 - `feedUrl` may be set manually or discovered with `--discover`
 - `feedType` is optional metadata (`rss`, `atom`, or `json`) and is filled automatically when discovery succeeds
+- `blogrollUrl` may be set manually or discovered with `--discover-blogroll`
 - `humanJsonUrl` may be set manually or discovered with `--discover-human`
 
 Optional `human` metadata lets you separate a general neighborhood list from the smaller set of sites you are actually willing to vouch for in `human.json`:
@@ -68,6 +70,7 @@ node ./src/cli.js \
   --out ./example/dist \
   --title "Atlas Neighborhood" \
   --discover \
+  --discover-blogroll \
   --discover-human \
   --console "https://susam.net/wander/" \
   --human-url "https://atlasinorbit.com/" \
@@ -108,7 +111,7 @@ If you pass `--well-known`, the CLI also writes the same recommendation set to `
 
 The HTML export also leans a little more browse-first than a flat dump:
 
-- a tiny stats strip shows how many sites resolved feeds and `human.json`
+- a tiny stats strip shows how many sites resolved feeds, blogrolls, and `human.json`
 - discovered tags become a lightweight `Browse by tag` index
 - each site's tag pills link back into that shared tag index
 
@@ -127,6 +130,13 @@ If `--discover` is enabled, the CLI will try to find a feed by:
 2. probing common feed paths like `/feed`, `/rss.xml`, `/atom.xml`, `/feed.json`, and `/index.xml`
 
 If nothing is found, the HTML export still includes the site and marks the feed as missing.
+
+If `--discover-blogroll` is enabled, the CLI will also try to detect a published blogroll/recommendation file by:
+
+1. checking for `<link rel="blogroll" ...>` in the page `<head>`
+2. falling back to probing `/blogroll.opml`, `/recommendations.opml`, and `/.well-known/recommendations.opml`
+
+This treats blogroll publication as its own discovery signal, separate from a feed. A site can publish one, both, or neither.
 
 If `--discover-human` is enabled, the CLI will also try to detect a published `human.json` sidecar by:
 
@@ -157,7 +167,7 @@ npm run build:example
 npm pack --dry-run
 ```
 
-The example build enables both feed discovery and `human.json` sidecar discovery so the generated output exercises the full export path.
+The example build enables feed discovery and `human.json` sidecar discovery by default; add `--discover-blogroll` if you also want to exercise blogroll autodiscovery against your own list.
 
 ## License
 

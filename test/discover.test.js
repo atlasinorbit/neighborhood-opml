@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { discoverFeed, discoverFeedUrl, discoverHumanJsonUrl } from '../src/discover.js';
+import { discoverFeed, discoverFeedUrl, discoverBlogrollUrl, discoverHumanJsonUrl } from '../src/discover.js';
 
 test('discoverFeedUrl returns feed from alternate link tag', async () => {
   const originalFetch = globalThis.fetch;
@@ -173,6 +173,68 @@ test('discoverFeed falls back to /feed.json when that is the first working feed 
       { url: 'https://plain.example/rss.xml', method: 'HEAD' },
       { url: 'https://plain.example/atom.xml', method: 'HEAD' },
       { url: 'https://plain.example/feed.json', method: 'HEAD' }
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('discoverBlogrollUrl returns linked blogroll when present', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    assert.equal(url, 'https://example.com/');
+    return {
+      ok: true,
+      url: 'https://example.com/',
+      async text() {
+        return '<html><head><link rel="blogroll" href="/blogroll.opml"></head></html>';
+      }
+    };
+  };
+
+  try {
+    const blogrollUrl = await discoverBlogrollUrl('https://example.com/');
+    assert.equal(blogrollUrl, 'https://example.com/blogroll.opml');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('discoverBlogrollUrl falls back to conventional recommendation paths', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url, method: options.method || 'GET' });
+
+    if (url === 'https://plain.example/') {
+      return {
+        ok: true,
+        url,
+        async text() {
+          return '<html><head></head><body>hello</body></html>';
+        }
+      };
+    }
+
+    if (url === 'https://plain.example/blogroll.opml' || url === 'https://plain.example/recommendations.opml') {
+      return { ok: false, url };
+    }
+
+    if (url === 'https://plain.example/.well-known/recommendations.opml') {
+      return { ok: true, url: 'https://plain.example/.well-known/recommendations.opml' };
+    }
+
+    throw new Error(`Unexpected URL: ${url}`);
+  };
+
+  try {
+    const blogrollUrl = await discoverBlogrollUrl('https://plain.example/');
+    assert.equal(blogrollUrl, 'https://plain.example/.well-known/recommendations.opml');
+    assert.deepEqual(calls, [
+      { url: 'https://plain.example/', method: 'GET' },
+      { url: 'https://plain.example/blogroll.opml', method: 'HEAD' },
+      { url: 'https://plain.example/recommendations.opml', method: 'HEAD' },
+      { url: 'https://plain.example/.well-known/recommendations.opml', method: 'HEAD' }
     ]);
   } finally {
     globalThis.fetch = originalFetch;

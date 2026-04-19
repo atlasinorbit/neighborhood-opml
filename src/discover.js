@@ -119,6 +119,38 @@ export async function discoverFeedUrl(siteUrl, options) {
   return (await discoverFeed(siteUrl, options)).feedUrl;
 }
 
+export async function discoverBlogrollUrl(siteUrl, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+  const fetched = await fetchSiteHtml(siteUrl, timeoutMs);
+  if (!fetched) {
+    return null;
+  }
+
+  const { response, html } = fetched;
+  const linkedBlogroll = findLinkedTag(html, (attrs) => {
+    const rel = (attrs.get('rel') || '').toLowerCase().split(/\s+/).filter(Boolean);
+    return rel.includes('blogroll') && attrs.has('href');
+  });
+
+  if (linkedBlogroll) {
+    const url = absolutize(response.url, linkedBlogroll.get('href'));
+    if (url) return url;
+  }
+
+  for (const path of ['/blogroll.opml', '/recommendations.opml', '/.well-known/recommendations.opml']) {
+    const fallback = absolutize(response.url, path);
+    if (!fallback) continue;
+
+    try {
+      const probe = await fetchWithTimeout(fallback, { method: 'HEAD', redirect: 'follow', headers: { accept: 'text/x-opml, application/xml, text/xml' } }, timeoutMs);
+      if (probe.ok) return probe.url;
+    } catch {
+      // ignore
+    }
+  }
+
+  return null;
+}
+
 export async function discoverHumanJsonUrl(siteUrl, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   const fetched = await fetchSiteHtml(siteUrl, timeoutMs);
   if (!fetched) {
